@@ -6,7 +6,7 @@ const config = {
     width: widthD,
     height: heightD,
     parent: 'gameContainer',
-    scene: [scene1],
+    scene: [MainScene, Scene1, Scene2],
     input: {
         keyboard: true,     // Keyboard input configuration. true uses the default configuration and false disables keyboard input.
         mouse: true,        // Mouse input configuration. true uses the default configuration and false disables mouse input.

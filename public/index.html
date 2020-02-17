@@ -11,8 +11,9 @@
     <script src="lib/codemirror.js"></script>
     <link rel="stylesheet" href="lib/codemirror.css">
 
-    <script src="js/scene1.js"></script>
-    <script src="js/square.js"></script>
+    <script src="js/Scene1.js"></script>
+    <script src="js/Scene2.js"></script>
+    <script src="js/MainScene.js"></script>
 
     <style>
         * {
@@ -23,18 +24,11 @@
 </head>
 <body>
 
-    <!--Zona de mensajes-->
-    <div id="first" style="height: 25vh; width: 100%;">
-        <button id="run">RUN</button>
-    </div>
-
     <!--Zona del editor de codigo-->
     <textarea id="code" style="height: 25vh;"></textarea>
-    <script src="js/codeMirror.js"></script>
-
 
     <!--Zona del juego-->
-    <div id="gameContainer" style="height: 50vh; width: 100%;">
+    <div id="gameContainer" style="height: 75vh; width: 100%;">
         <script src="js/phaser.js"></script>
         <script src="js/Player.js"></script>
     </div>
