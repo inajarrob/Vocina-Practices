@@ -28,10 +28,6 @@ class Scene1 extends Phaser.Scene {
         this.load.tilemapTiledJSON("level-1", "../tiled/level-1.json");
     }
 
-    printA(){
-        console.log('AKLJSHFDKLADSJFJH');
-    }
-
     create() {
         /*
          *
@@ -83,31 +79,30 @@ class Scene1 extends Phaser.Scene {
             // spawn points
             if (object.type === 'Spawn') {
                 if (object.name === 'Player') {
-                    this.player = new Player(this, object.x, object.y);
+                    this.andy = new Player(this, object.x, object.y);
                 }
             }
         }, this);
 
         // Add collisions.
-        this.physics.add.collider(this.player, this.wallsLayer);
-        this.physics.add.overlap(this.player, this.stairs, function () {
-            this.player.onStairs = true;
+        this.physics.add.collider(this.andy, this.wallsLayer);
+        this.physics.add.overlap(this.andy, this.stairs, function () {
+            this.andy.onStairs = true;
         }, null, this);
 
         // start camera
         this.cameras.main.setZoom(2.0);
 
         // Set first room boundaries.
-        console.log(this.rooms[this.player.currentRoom].x);
-        console.log(this.rooms[this.player.currentRoom].y);
+        //The viewPort is still set bellow to be understandable by someone
         this.cameras.main.setViewport(0, 208, 512, 256);
         this.cameras.main.setBounds(512,
             416,
-            this.rooms[this.player.currentRoom].width,
-            this.rooms[this.player.currentRoom].height,
+            this.rooms[this.andy.currentRoom].width,
+            this.rooms[this.andy.currentRoom].height,
             true);
 
-        this.cameras.main.startFollow(this.player);
+        this.cameras.main.startFollow(this.andy);
 
         this.cameras.main.fadeIn(2000, 0, 0, 0);
 
@@ -130,23 +125,23 @@ class Scene1 extends Phaser.Scene {
         this.cameras.main._cw = this.map.widthInPixels;
 
         // On player room change, stop player movement, fade camerea, and set boundaries.
-        if (this.player.roomChange) {
+        if (this.andy.roomChange) {
 
             this.cameras.main.fadeOut(250, 0, 0, 0, function (camera, progress) {
-                this.player.canMove = false;
+                this.andy.canMove = false;
                 if (progress === 1) {
                     // Change camera boundaries when fade out complete.
-                    this.cameras.main.setBounds(this.rooms[this.player.currentRoom].x,
-                        this.rooms[this.player.currentRoom].y,
-                        this.rooms[this.player.currentRoom].width,
-                        this.rooms[this.player.currentRoom].height,
+                    this.cameras.main.setBounds(this.rooms[this.andy.currentRoom].x,
+                        this.rooms[this.andy.currentRoom].y,
+                        this.rooms[this.andy.currentRoom].width,
+                        this.rooms[this.andy.currentRoom].height,
                         true);
 
                     // Fade back in with new boundareis.
                     this.cameras.main.fadeIn(500, 0, 0, 0, function (camera, progress) {
                         if (progress === 1) {
-                            this.player.canMove = true;
-                            this.roomStart(this.player.currentRoom);
+                            this.andy.canMove = true;
+                            this.roomStart(this.andy.currentRoom);
                         }
                     }, this);
                 }
