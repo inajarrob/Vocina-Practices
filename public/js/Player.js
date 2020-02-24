@@ -30,13 +30,14 @@ class Player extends Phaser.GameObjects.Sprite {
         this.body.setOffset(7, 16);
         this.body.setCircle(3);
 
-        //If it's necessary just use the code bellow for witchever reason that is needed
-        //this.keys = scene.input.keyboard.addKeys('W,S,A,D,UP,LEFT,RIGHT,DOWN,SPACE');
-
         this.lastAnim = null;
         this.vel = 200;
         this.onStairs = false;
-        this.direction = 'down';
+        this.direction = null;
+        
+        // Boolean to control if the player cant move
+        this.movement = true;
+        this.numberMov = 0;
 
         config = {
             key: 'stand-down',
@@ -108,53 +109,88 @@ class Player extends Phaser.GameObjects.Sprite {
     }
 
     //LEFT
-    moveLeft() {
-        if (this.canMove) {
+    moveLeft(numOfMovs, assign=true) {
+        if(assign){
+            this.numberMov = numOfMovs;
+        }
+        if (this.canMove && this.numberMov > 0) {
             this.direction = 'left';
             this.body.setVelocityX(-this.vel);
             this.animationName = "walk-right";
             this.setFlipX(true);
-            this.lastAnimation();
+            //this.lastAnimation();
+            this.vel = 100;
+            this.body.velocity.normalize().scale(this.vel);
+            this.numberMov -= 1;
+        } else{
+            this.canMove = false;
+            this.direction = null;
+            this.numberMov = 0;
         }
     }
 
     //RIGHT
-    moveRight() {
-        if (this.canMove) {
+    moveRight(numOfMovs, assign=true) {
+        if(assign){
+            this.numberMov = numOfMovs;
+        }
+        
+        if (this.canMove && this.numberMov > 0) {
             this.direction = 'right';
             this.body.setVelocityX(this.vel);
             this.animationName = "walk-right";
             this.setFlipX(false);
-            this.lastAnimation();
+            this.numberMov -= 1;
+           // this.lastAnimation();
+        } else{
+            this.canMove = false;
+            this.direction = null;
+            this.numberMov = 0;
         }
     }
 
     //UP
-    moveUp() {
-        if (this.canMove) {
+    moveUp(numOfMovs, assign=true) {
+        if(assign){
+            this.numberMov = numOfMovs;
+        }
+        if (this.canMove && this.numberMov > 0) {
             this.direction = 'up';
             this.body.setVelocityY(-this.vel);
             this.animationName = 'walk-up';
-            this.lastAnimation();
+            this.numberMov -= 1;
+            //this.lastAnimation();
+        } else{
+            this.canMove = false;
+            this.direction = null;
+            this.numberMov = 0;
         }
     }
 
     //DOWN
-    moveDown() {
-        if (this.canMove) {
+    moveDown(numOfMovs, assign=true) {
+        if(assign){
+            this.numberMov = numOfMovs;
+        }
+        if (this.canMove && this.numberMov > 0) {
             this.direction = 'down';
             this.body.setVelocityY(this.vel);
             this.animationName = 'walk-down';
-            this.lastAnimation();
+            this.numberMov -= 1;
+            //this.lastAnimation();
+        } else{
+            this.canMove = false;
+            this.direction = null;
+            this.numberMov = 0;
         }
     }
 
-    lastAnimation() {
+    /*lastAnimation() {
         if (this.lastAnim !== this.animationName) {
             this.lastAnim = this.animationName;
             this.anims.play(this.animationName, true);
         }
-    }
+    }*/
 
     /**
      * Called before Update.
@@ -168,28 +204,42 @@ class Player extends Phaser.GameObjects.Sprite {
         this.body.setVelocity(0);
         this.animationName = null;
 
-        // standing
-        let currentDirection = this.direction;
-        if (this.direction === 'left') {
-            currentDirection = 'right';
-        } //account for flipped sprite
-        this.animationName = 'stand-' + currentDirection;
+        if(this.canMove){
+            // standing
+            let currentDirection = this.direction;
+            if (this.direction === 'left') {
+                currentDirection = 'right';
+            } //account for flipped sprite
+            this.animationName = 'stand-' + currentDirection;
+            
+            // switch movement
+            switch(this.direction) {
+                case 'up':
+                    console.log(this.numberMov, false);
+                    this.moveUp(this.numberMov, false);
+                break;
+                case 'down':
+                    console.log(this.numberMov, false);
+                    this.moveDown(this.numberMov, false);
+                break;
+                case 'left':
+                    console.log(this.numberMov, false);
+                    this.moveLeft(this.numberMov, false);
+                break;
+                case 'right':
+                    console.log(this.numberMov, false);
+                    this.moveRight(this.numberMov);
+                break;
+            }
+            
+            // diagnoal movement
+            this.body.velocity.normalize().scale(this.vel);
 
-
-        // Stairs
-        if (this.onStairs) {
-            this.vel = 50;
-            this.onStairs = false;
-        } else {
-            this.vel = 200;
+            // Check for room change.
+            this.getRoom();
         }
+}
 
-        // diagnoal movement
-        this.body.velocity.normalize().scale(this.vel);
-
-        // Check for room change.
-        this.getRoom();
-    }
 
     /** Returns player's current and previous room, flags rooms player has entered. */
     getRoom() {
