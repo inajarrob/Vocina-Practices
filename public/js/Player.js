@@ -2,7 +2,7 @@
  * Class representing the player.
  * @extends Phaser.GameObjects.Sprite
  */
-class Player extends Phaser.GameObjects.Sprite {
+class Player extends Phaser.Physics.Arcade.Sprite {
 
     /**
      * Create the player.
@@ -19,7 +19,6 @@ class Player extends Phaser.GameObjects.Sprite {
         this.previousRoom = null;
         this.roomChange = false;
         this.canMove = true;
-
         scene.physics.world.enable(this);
         scene.add.existing(this);
 
@@ -34,7 +33,8 @@ class Player extends Phaser.GameObjects.Sprite {
         this.vel = 200;
         this.onStairs = false;
         this.direction = null;
-        
+        this.target = new Phaser.Math.Vector2();
+
         // Boolean to control if the player cant move
         this.movement = true;
         this.numberMov = 0;
@@ -108,89 +108,84 @@ class Player extends Phaser.GameObjects.Sprite {
 
     }
 
-    //LEFT
-    moveLeft(numOfMovs, assign=true) {
-        if(assign){
-            this.numberMov = numOfMovs;
-        }
-        if (this.canMove && this.numberMov > 0) {
-            this.direction = 'left';
-            this.body.setVelocityX(-this.vel);
-            this.animationName = "walk-right";
-            this.setFlipX(true);
-            //this.lastAnimation();
-            this.vel = 100;
-            this.body.velocity.normalize().scale(this.vel);
-            this.numberMov -= 1;
-        } else{
-            this.canMove = false;
-            this.direction = null;
-            this.numberMov = 0;
-        }
-    }
+    moveRight(numberOfMovs) {
+        //16 is the distance between the center of two tiles, or the distance the sprite has to travel
+        //to reach the next tile
+        if (this.canMove) {
+            this.target.x = this.x + 16 * numberOfMovs;
+            this.target.y = this.y;
 
-    //RIGHT
-    moveRight(numOfMovs, assign=true) {
-        if(assign){
-            this.numberMov = numOfMovs;
-        }
-        
-        if (this.canMove && this.numberMov > 0) {
             this.direction = 'right';
-            this.body.setVelocityX(this.vel);
-            this.animationName = "walk-right";
+            this.animationName = "walk-up";
             this.setFlipX(false);
-            this.numberMov -= 1;
-           // this.lastAnimation();
-        } else{
-            this.canMove = false;
-            this.direction = null;
-            this.numberMov = 0;
+            this.lastAnimation();
+
+            //30 means that the sprite goes as fast as 30pixels per second (Is the value of this.body.speed)
+            this.scene.physics.moveToObject(this, this.target, 30);
         }
     }
 
-    //UP
-    moveUp(numOfMovs, assign=true) {
-        if(assign){
-            this.numberMov = numOfMovs;
+    moveLeft(numberOfMovs) {
+        //16 is the distance between the center of two tiles, or the distance the sprite has to travel
+        //to reach the next tile
+        if (this.canMove) {
+            this.target.x = this.x - 16 * numberOfMovs;
+            this.target.y = this.y;
+
+            this.direction = 'left';
+            this.animationName = "walk-up";
+            this.setFlipX(true);
+            this.lastAnimation();
+
+            //30 means that the sprite goes as fast as 30pixels per second (Is the value of this.body.speed)
+            this.scene.physics.moveToObject(this, this.target, 30);
         }
-        if (this.canMove && this.numberMov > 0) {
+    }
+
+    moveUp(numberOfMovs) {
+        //16 is the distance between the center of two tiles, or the distance the sprite has to travel
+        //to reach the next tile
+        if (this.canMove) {
+            this.target.x = this.x;
+            //y coordinate is "reversed", that is: positive y means DOWN and negative y means UP
+            this.target.y = this.y - 16 * numberOfMovs;
+
             this.direction = 'up';
-            this.body.setVelocityY(-this.vel);
             this.animationName = 'walk-up';
-            this.numberMov -= 1;
-            //this.lastAnimation();
-        } else{
-            this.canMove = false;
-            this.direction = null;
-            this.numberMov = 0;
+            this.lastAnimation();
+
+            //30 means that the sprite goes as fast as 30pixels per second (Is the value of this.body.speed)
+            this.scene.physics.moveToObject(this, this.target, 30);
         }
     }
 
-    //DOWN
-    moveDown(numOfMovs, assign=true) {
-        if(assign){
-            this.numberMov = numOfMovs;
-        }
-        if (this.canMove && this.numberMov > 0) {
+    moveDown(numberOfMovs) {
+        //16 is the distance between the center of two tiles, or the distance the sprite has to travel
+        //to reach the next tile
+        if (this.canMove) {
+            this.target.x = this.x;
+            this.target.y = this.y + 16 * numberOfMovs;
+
             this.direction = 'down';
-            this.body.setVelocityY(this.vel);
-            this.animationName = 'walk-down';
-            this.numberMov -= 1;
-            //this.lastAnimation();
-        } else{
-            this.canMove = false;
-            this.direction = null;
-            this.numberMov = 0;
+            this.animationName = 'walk-up';
+            this.lastAnimation();
+
+            //30 means that the sprite goes as fast as 30pixels per second (Is the value of this.body.speed)
+            this.scene.physics.moveToObject(this, this.target, 30);
         }
     }
 
-    /*lastAnimation() {
+    lastAnimation() {
         if (this.lastAnim !== this.animationName) {
             this.lastAnim = this.animationName;
             this.anims.play(this.animationName, true);
         }
-    }*/
+    }
+
+    stopAnimation() {
+        //  This will just top the animation from running, freezing it at its current frame
+        this.anims.stop();
+    }
 
     /**
      * Called before Update.
@@ -200,45 +195,32 @@ class Player extends Phaser.GameObjects.Sprite {
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
 
-        // movement and animation
-        this.body.setVelocity(0);
-        this.animationName = null;
+        //If the sprite reaches it's destination, it's animation should stop
+        if(this.x == this.target.x && this.y == this.target.y) this.stopAnimation();
 
-        if(this.canMove){
+        if (this.canMove) {
             // standing
             let currentDirection = this.direction;
             if (this.direction === 'left') {
                 currentDirection = 'right';
             } //account for flipped sprite
             this.animationName = 'stand-' + currentDirection;
-            
-            // switch movement
-            switch(this.direction) {
-                case 'up':
-                    console.log(this.numberMov, false);
-                    this.moveUp(this.numberMov, false);
-                break;
-                case 'down':
-                    console.log(this.numberMov, false);
-                    this.moveDown(this.numberMov, false);
-                break;
-                case 'left':
-                    console.log(this.numberMov, false);
-                    this.moveLeft(this.numberMov, false);
-                break;
-                case 'right':
-                    console.log(this.numberMov, false);
-                    this.moveRight(this.numberMov);
-                break;
+
+            //Distance between andy and the point will reach
+            let distance = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
+
+            if (this.body.speed > 0) {
+                //  4 is our distance tolerance, i.e. how close the source can get to the target
+                //  before it is considered as being there. The faster it moves, the more tolerance is required.
+                if (distance < 0.5) {
+                    this.body.reset(this.target.x, this.target.y);
+                }
             }
-            
-            // diagnoal movement
-            this.body.velocity.normalize().scale(this.vel);
 
             // Check for room change.
             this.getRoom();
         }
-}
+    }
 
 
     /** Returns player's current and previous room, flags rooms player has entered. */

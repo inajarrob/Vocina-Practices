@@ -1,17 +1,13 @@
 class MainScene extends Phaser.Scene {
     constructor() {
-        super("mainScene");
-    }
-
-    preload() {
-
+        super("MainScene");
     }
 
     create() {
-        //Controla las escenas
-        console.log("Creando juego")
+        console.log("Creating game");
 
-        this.scene.launch("scene1");
-        this.scene.launch("scene2");
+        //Call the scenes
+        this.scene.launch("SceneUp");
+        this.scene.launch("SceneDown");
     }
 }
